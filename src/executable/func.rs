@@ -1,8 +1,10 @@
-use regex::{self, Regex};
-use crate::arithmetic::*;
+use regex::Regex;
 use super::datatype::*;
 use super::execution;
 use super::display;
+
+use crate::customio::*;
+use crate::arithmetic::*;
 
 pub(super) fn as_algebra(raw_input: &str) -> Result<Algebra, ParseError> {
     let input_string = raw_input.to_ascii_uppercase();

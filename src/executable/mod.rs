@@ -1,15 +1,14 @@
-pub mod execution;
-pub mod display;
-pub mod datatype;
-pub mod func;
-
-use std::io::{self, Write};
+mod execution;
+mod display;
+mod datatype;
+mod func;
 
 pub fn go(){
     loop {
         let mut input = String::new();
         print!("> ");
         
+        use std::io; use std::io::Write;
         io::stdout().flush().unwrap();
         io::stdin().read_line(&mut input).expect("Invalid input.");
 

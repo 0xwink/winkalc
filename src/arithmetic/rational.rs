@@ -1,5 +1,3 @@
-use crate::arithmetic::integer::GaussInteger;
-
 use super::*;
 
 pub struct NumPair {

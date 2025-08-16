@@ -64,7 +64,7 @@ impl Prime {
         if x.number == 0 { panic!(); }
 
         let p = self.to_integer();
-        let u = Self::bezout(Duo{first: x, second: p}).first;
+        let (u, _, _) = Integer::unwrapped_bezout(&x, &p);
 
         self.modulo(&u)
     }

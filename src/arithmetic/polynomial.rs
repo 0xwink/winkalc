@@ -1,10 +1,7 @@
-use std::vec;
-
 use super::*;
 
 pub type Z = Integer;
 pub type QPol = Polynomial<Rational>;
-
 
 #[derive(Clone, Debug)]
 pub struct Polynomial<T: Field>{
@@ -391,6 +388,7 @@ impl std::cmp::PartialEq for ZPol {
         Self::equal(self, other)
     }
 }
+
 
 // Important: QPol -> ZPol conversion, for re-use of qpol parser
 impl QPol {

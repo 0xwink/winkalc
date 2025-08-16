@@ -1,7 +1,8 @@
-pub mod display;
-pub mod parse;
+mod display;
+pub use display::SimpleDisplay;
 
+mod parse;
 pub use parse::{Parse, ParseError};
 
-use crate::arithmetic::*;
-use crate::{Field, EuclideanRing, Duo, Trio};
+use super::arithmetic::*;
+use crate::{Duo, Trio};

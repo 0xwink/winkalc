@@ -15,4 +15,5 @@ pub use ring::{Field, EuclideanRing, Ring};
 
 pub use i64 as int;
 
-use super::{Duo, Trio};
+
+use crate::{Duo, Trio};

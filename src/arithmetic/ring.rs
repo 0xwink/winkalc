@@ -185,6 +185,14 @@ pub trait EuclideanRing: Clone + std::fmt::Display + PartialEq {
             third: reg_r.second,
         }
     }
+
+    fn unwrapped_bezout(f: &Self, g: &Self) -> (Self, Self, Self) {
+        let res = Self::bezout(&Duo {
+            first: f.clone(), second: g.clone()
+        });
+
+        (res.first, res.second, res.third)
+    }
 }
 
 pub trait Ring: Clone + PartialEq {

@@ -1,5 +1,5 @@
 use super::*;
-use regex::{self, Regex};
+use regex::Regex;
 
 #[derive(PartialEq, Debug)]
 pub enum ParseError {

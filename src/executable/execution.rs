@@ -1,7 +1,6 @@
 use super::datatype::*;
-use crate::arithmetic::{Integer, Prime, ZPol};
-use crate::customio::display::SimpleDisplay;
-use crate::{unwrapped_bezout, EuclideanRing, Field, Parse};
+use crate::arithmetic::*;
+use crate::customio::*;
 
 pub(super) fn execute_ring<R>(cmd: &RawCommand) -> Result<RawResult, ParseError>
 where R: EuclideanRing + Parse + SimpleDisplay {
@@ -12,7 +11,7 @@ where R: EuclideanRing + Parse + SimpleDisplay {
     let operand2 = R::parse(str_operand2)?;
     
     if op == Operation::Bezout {
-        let (u, v, gcd) = unwrapped_bezout(&operand1, &operand2);
+        let (u, v, gcd) = R::unwrapped_bezout(&operand1, &operand2);
 
         Ok(RawResult{
             oper1: operand1.simple_display(),
