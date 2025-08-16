@@ -16,6 +16,14 @@ impl Integer{
             denominator: 1
         }
     }
+
+    pub fn is_positive(&self) -> bool {
+        self.number > 0
+    }
+
+    pub fn is_negative(&self) -> bool {
+        self.number < 0
+    }
 }
 
 impl EuclideanRing for Integer{
@@ -86,12 +94,8 @@ impl EuclideanRing for Integer{
     }
 }
 
-impl std::cmp::PartialEq for Integer {
-    fn eq(&self, other: &Self) -> bool {
-        Self::equal(self, other)
-    }
-}
 
+#[derive(Clone, Copy, Debug)] 
 pub struct GaussInteger{
     pub real: Integer,
     pub imag: Integer,
@@ -107,6 +111,15 @@ impl GaussInteger{
             real: self.real.to_rational(),
             imag: self.imag.to_rational()
         }
+    }
+
+    // 0 is regular; if a+bi is nonzero, then it is regular iff a>0 and b>=0. 
+    pub fn is_regular(&self) -> bool {
+        if self.is_zero() {
+            return true;
+        }
+
+        self.real.is_positive() && !self.imag.is_negative()
     }
 }
 
@@ -150,4 +163,148 @@ impl EuclideanRing for GaussInteger{
         (self.real.number * self.real.number + self.imag.number * self.imag.number) as usize
     }
     
+    fn divmod(x: &Self, y: &Self) -> Duo<Self> {
+        if y.is_zero() {
+            panic!("Cannot divide by zero.");
+        }
+        
+        let x_rat = x.to_complex_rational(); let y_rat = y.to_complex_rational();
+        let q = (x_rat/y_rat).nearest_gauss_integer();
+        let r = *x - (q * *y);
+
+        Duo::<Self> {
+            first: q, second: r
+        }
+    }
+
+    fn regular(&self) -> Trio<Self> {
+        let i = Self::new(0,1);
+        let one = Self::one();
+        let z = self.clone();
+
+        if z.is_regular() {
+            return Trio::<Self> {
+                first: one, second: z, third: one
+            }
+        } else if (z * i).is_regular() {
+            return Trio::<Self> {
+                first: -i, second: z * i, third: i
+            }
+        } else if (-z).is_regular() {
+            return Trio::<Self> {
+                first: -one, second: -z, third: -one
+            }
+        } else {
+            return Trio::<Self> {
+                first: i, second: -(z * i), third: -i
+            }
+        }
+    }
 }
+
+mod chore {
+    use super::{Integer, GaussInteger, EuclideanRing};
+
+    impl std::cmp::PartialEq for Integer {
+        fn eq(&self, other: &Self) -> bool {
+            Self::equal(self, other)
+        }
+    }
+
+    impl std::cmp::Eq for Integer{}
+
+    impl std::cmp::Ord for Integer {
+        fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+            use std::cmp::Ordering;
+
+            let res = Integer::subtract(self, other);
+            if res.number < 0 {
+                return Ordering::Less;
+            } else if res.number > 0 {
+                return Ordering::Greater;
+            } else {
+                return Ordering::Equal;
+            }
+        }
+    }
+
+    impl std::cmp::PartialOrd for Integer{
+        fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+            Some(self.cmp(other))
+        }
+    }
+
+    impl std::ops::Add for Integer {
+        type Output = Self;
+
+        fn add(self, rhs: Self) -> Self {
+            <Self as EuclideanRing>::add(&self, &rhs)
+        }
+    }
+
+    impl std::ops::Sub for Integer {
+        type Output = Self;
+
+        fn sub(self, rhs: Self) -> Self {
+            <Self as EuclideanRing>::subtract(&self, &rhs)
+        }
+    }
+
+    impl std::ops::Mul for Integer {
+        type Output = Self;
+
+        fn mul(self, rhs: Self) -> Self {
+            <Self as EuclideanRing>::multiply(&self, &rhs)
+        }
+    }
+
+    impl std::ops::Neg for Integer {
+        type Output = Self;
+
+        fn neg(self) -> Self {
+            <Self as EuclideanRing>::neg(&self)
+        }
+    }
+
+    
+    impl std::cmp::PartialEq for GaussInteger {
+        fn eq(&self, other: &Self) -> bool {
+            Self::equal(self, other)
+        }
+    }
+
+    impl std::cmp::Eq for GaussInteger{}
+
+    impl std::ops::Add for GaussInteger {
+        type Output = Self;
+
+        fn add(self, rhs: Self) -> Self {
+            <Self as EuclideanRing>::add(&self, &rhs)
+        }
+    }
+
+    impl std::ops::Sub for GaussInteger {
+        type Output = Self;
+
+        fn sub(self, rhs: Self) -> Self {
+            <Self as EuclideanRing>::subtract(&self, &rhs)
+        }
+    }
+
+    impl std::ops::Mul for GaussInteger {
+        type Output = Self;
+
+        fn mul(self, rhs: Self) -> Self {
+            <Self as EuclideanRing>::multiply(&self, &rhs)
+        }
+    }
+
+        impl std::ops::Neg for GaussInteger {
+        type Output = Self;
+
+        fn neg(self) -> Self {
+            <Self as EuclideanRing>::neg(&self)
+        }
+    }
+}
+

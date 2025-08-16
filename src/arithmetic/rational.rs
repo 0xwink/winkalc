@@ -79,8 +79,6 @@ impl NumPair {
 }
 
 
-
-
 #[derive(Copy, Clone, Debug)]
 pub struct Rational{
     pub numerator: int,
@@ -122,6 +120,49 @@ impl Rational {
 
     pub fn is_negative(&self) -> bool {
         self.reduced().numerator < 0  
+    }
+
+    pub fn abs(&self) -> Self {
+        match self.is_negative() {
+            true => self.neg(),
+            false => self.clone()
+        }.reduced()
+    }
+
+    // give a rational x, it returns the greatest integer n such that n <=x.
+    // e.g. 0 -> 0; 1 -> 1; 0.5 -> 0; 1.2 -> 1; -0.2 -> -1; 
+    pub fn floor(&self) -> Integer {
+        // floor function takes an integer to itself
+        if self.is_integer() {
+            return self.to_integer().unwrap();
+        }
+
+        // The following is non-integer case;
+        // For x a negative non-integer, floor(x) = -(floor(abs(x))+1)
+        let abs = self.abs();
+
+        let num = abs.numerator; let den = abs.denominator;
+        let q = num.div_euclid(den);
+        
+        match self.is_negative() {
+            true => Integer::new(-(q+1)),
+            false => Integer::new(q)
+        }
+    }
+
+    // Calculate the distance from self to its floor, if diff <= 1/2 then return floor.
+    // If not, return floor + 1.
+    // We always have [n, n+0.5] -> n; (n+0.5, n+1) -> n+1. 
+    pub fn nearest_integer(&self) -> Integer {
+        let half = Rational::new(1,2);
+        let floor = self.floor();
+        let diff = *self - floor.to_rational();
+
+        if diff <= half {
+            floor
+        } else {
+            Integer::new(floor.number+1)
+        }
     }
 }
 
@@ -176,81 +217,6 @@ impl Field for Rational {
         Self::multiply(x, &(y.inv()))
     }
 }
-
-
-
-
-// Chore: overloading arithmetic operators (+ - * / = < >) for Rational 
-impl std::cmp::PartialEq for Rational {
-    fn eq(&self, other: &Self) -> bool {
-        Rational::equal(self, other)
-    }
-}
-
-impl std::cmp::Eq for Rational {}
-
-impl std::cmp::Ord for Rational {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        use std::cmp::Ordering;
-
-        let res = Rational::subtract(self, other);
-        if res.numerator < 0 {
-            return Ordering::Less;
-        } else if res.numerator > 0 {
-            return Ordering::Greater;
-        } else {
-            return Ordering::Equal;
-        }
-    }
-}
-
-impl std::cmp::PartialOrd for Rational{
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl std::ops::Add for Rational {
-    type Output = Self;
-
-    fn add(self, rhs: Self) -> Self {
-        <Self as Field>::add(&self, &rhs)
-    }
-}
-
-impl std::ops::Sub for Rational {
-    type Output = Self;
-
-    fn sub(self, rhs: Self) -> Self {
-        <Self as Field>::subtract(&self, &rhs)
-    }
-}
-
-impl std::ops::Mul for Rational {
-    type Output = Self;
-
-    fn mul(self, rhs: Self) -> Self {
-        <Self as Field>::multiply(&self, &rhs)
-    }
-}
-
-impl std::ops::Neg for Rational {
-    type Output = Self;
-
-    fn neg(self) -> Self {
-        <Self as Field>::neg(&self)
-    }
-}
-
-impl std::ops::Div for Rational {
-    type Output = Self;
-
-    fn div(self, rhs: Self) -> Self {
-        <Self as Field>::divide(&self, &rhs)
-    }
-}
-
-
 
 
 #[derive(Copy, Clone, Debug)]
@@ -311,6 +277,13 @@ impl ComplexRational {
 
     pub fn is_pure_imag(&self) -> bool {
         self.real == Rational::zero()
+    }
+
+    // Note that a complex number can have several nearest gauss integer, 
+    // e.g. how to find it for 0.5 + 0.5i? No canonical choice. This depends on the implementation.
+    // If x is itself a Gaussian integer, then the function always returns itself.
+    pub fn nearest_gauss_integer(&self) -> GaussInteger {
+        GaussInteger { real: self.real.nearest_integer(), imag: self.imag.nearest_integer() }
     }
 }
 
@@ -384,52 +357,126 @@ impl Field for ComplexRational {
 }
 
 
+mod chore {
+    use super::{ComplexRational, Rational, Field};
 
-// Chore: overloading arithmetic operators (+ - * / =) for ComplexRational
-impl std::cmp::PartialEq for ComplexRational {
-    fn eq(&self, other: &Self) -> bool {
-        <ComplexRational as Field>::equal(&self, other)
+    // Chore: overloading arithmetic operators (+ - * / = < >) for Rational 
+    impl std::cmp::PartialEq for Rational {
+        fn eq(&self, other: &Self) -> bool {
+            Rational::equal(self, other)
+        }
+    }
+
+    impl std::cmp::Eq for Rational {}
+
+    impl std::cmp::Ord for Rational {
+        fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+            use std::cmp::Ordering;
+
+            let res = Rational::subtract(self, other);
+            if res.numerator < 0 {
+                return Ordering::Less;
+            } else if res.numerator > 0 {
+                return Ordering::Greater;
+            } else {
+                return Ordering::Equal;
+            }
+        }
+    }
+
+    impl std::cmp::PartialOrd for Rational{
+        fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+            Some(self.cmp(other))
+        }
+    }
+
+    impl std::ops::Add for Rational {
+        type Output = Self;
+
+        fn add(self, rhs: Self) -> Self {
+            <Self as Field>::add(&self, &rhs)
+        }
+    }
+
+    impl std::ops::Sub for Rational {
+        type Output = Self;
+
+        fn sub(self, rhs: Self) -> Self {
+            <Self as Field>::subtract(&self, &rhs)
+        }
+    }
+
+    impl std::ops::Mul for Rational {
+        type Output = Self;
+
+        fn mul(self, rhs: Self) -> Self {
+            <Self as Field>::multiply(&self, &rhs)
+        }
+    }
+
+    impl std::ops::Neg for Rational {
+        type Output = Self;
+
+        fn neg(self) -> Self {
+            <Self as Field>::neg(&self)
+        }
+    }
+
+    impl std::ops::Div for Rational {
+        type Output = Self;
+
+        fn div(self, rhs: Self) -> Self {
+            <Self as Field>::divide(&self, &rhs)
+        }
+    }
+
+    // Chore: overloading arithmetic operators (+ - * / =) for ComplexRational
+    impl std::cmp::PartialEq for ComplexRational {
+        fn eq(&self, other: &Self) -> bool {
+            <ComplexRational as Field>::equal(&self, other)
+        }
+    }
+
+    impl std::cmp::Eq for ComplexRational {}
+
+    impl std::ops::Add for ComplexRational {
+        type Output = Self;
+
+        fn add(self, rhs: Self) -> Self {
+            <Self as Field>::add(&self, &rhs)
+        }
+    }
+
+    impl std::ops::Sub for ComplexRational {
+        type Output = Self;
+
+        fn sub(self, rhs: Self) -> Self {
+            <Self as Field>::subtract(&self, &rhs)
+        }
+    }
+
+    impl std::ops::Mul for ComplexRational {
+        type Output = Self;
+
+        fn mul(self, rhs: Self) -> Self {
+            <Self as Field>::multiply(&self, &rhs)
+        }
+    }
+
+    impl std::ops::Neg for ComplexRational {
+        type Output = Self;
+
+        fn neg(self) -> Self {
+            <Self as Field>::neg(&self)
+        }
+    }
+
+    impl std::ops::Div for ComplexRational {
+        type Output = Self;
+
+        fn div(self, rhs: Self) -> Self {
+            <Self as Field>::divide(&self, &rhs)
+        }
     }
 }
 
-impl std::cmp::Eq for ComplexRational {}
-
-impl std::ops::Add for ComplexRational {
-    type Output = Self;
-
-    fn add(self, rhs: Self) -> Self {
-        <Self as Field>::add(&self, &rhs)
-    }
-}
-
-impl std::ops::Sub for ComplexRational {
-    type Output = Self;
-
-    fn sub(self, rhs: Self) -> Self {
-        <Self as Field>::subtract(&self, &rhs)
-    }
-}
-
-impl std::ops::Mul for ComplexRational {
-    type Output = Self;
-
-    fn mul(self, rhs: Self) -> Self {
-        <Self as Field>::multiply(&self, &rhs)
-    }
-}
-
-impl std::ops::Neg for ComplexRational {
-    type Output = Self;
-
-    fn neg(self) -> Self {
-        <Self as Field>::neg(&self)
-    }
-}
-
-impl std::ops::Div for ComplexRational {
-    type Output = Self;
-
-    fn div(self, rhs: Self) -> Self {
-        <Self as Field>::divide(&self, &rhs)
-    }
-}

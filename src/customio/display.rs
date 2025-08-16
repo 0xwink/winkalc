@@ -356,3 +356,9 @@ impl std::fmt::Display for ComplexRational {
         write!(f, "{}", self.simple_display())
     }
 }
+
+impl std::fmt::Display for GaussInteger {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.simple_display())
+    }
+}

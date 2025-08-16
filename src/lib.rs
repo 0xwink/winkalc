@@ -61,6 +61,14 @@ pub trait EuclideanRing: Clone + Display + PartialEq {
         }
         None
     }
+
+    fn is_zero(&self) -> bool {
+        Self::equal(self, &Self::zero())
+    }
+
+    fn is_one(&self) -> bool {
+        Self::equal(self, &Self::one())
+    }
 }
 
 pub trait Ring: Clone + PartialEq {
