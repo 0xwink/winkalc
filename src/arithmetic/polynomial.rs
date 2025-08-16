@@ -2,8 +2,8 @@ use std::vec;
 
 use super::*;
 
-type Z = Integer;
-type QPol = Polynomial<Rational>;
+pub type Z = Integer;
+pub type QPol = Polynomial<Rational>;
 
 
 #[derive(Clone, Debug)]

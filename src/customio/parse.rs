@@ -207,3 +207,34 @@ impl Parse for ZPol {
         Ok(zpol)
     }
 }
+
+// trick: use Polynomial Parse for Complex parse
+impl Parse for ComplexRational {
+    fn parse(input: &str) -> Result<Self, ParseError> {
+        let pol_str = input.replace("i", "x");
+        let pol = QPol::parse(&pol_str)?;
+
+        if pol.norm() >= 2 {
+            return Err(ParseError::Operand);
+        }
+
+        let res = ComplexRational {
+            real: pol.coefficient(0),
+            imag: pol.coefficient(1)
+        };
+
+        Ok(res)
+    }
+}
+
+impl Parse for GaussInteger {
+    fn parse(input: &str) -> Result<Self, ParseError> {
+        let rat = ComplexRational::parse(input)?;
+
+        let Some(res) = rat.to_gauss_integer() else {
+            return Err(ParseError::Operand);
+        };
+
+        Ok(res)
+    }
+}

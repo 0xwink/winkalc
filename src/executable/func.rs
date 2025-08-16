@@ -21,6 +21,9 @@ pub(super) fn as_algebra(raw_input: &str) -> Result<Algebra, ParseError> {
     if input == "QPOL" {
         return Ok(Algebra::QPol);
     }
+    if input == "ZI" {
+        return Ok(Algebra::Zi);
+    }
 
     // F(p) case
     if re_f.is_match(input){
@@ -93,7 +96,8 @@ pub(super) fn execute(cmd: &RawCommand) -> Result<RawResult, ParseError> {
         Algebra::Q => execution::execute_field::<Rational>(cmd),
         Algebra::QPol => execution::execute_ring::<Polynomial<Rational>>(cmd),
         Algebra::F(_) => execution::execute_f(cmd),
-        Algebra::FPol(_) => execution::execute_fpol(cmd)
+        Algebra::FPol(_) => execution::execute_fpol(cmd),
+        Algebra::Zi => execution::execute_ring::<GaussInteger>(cmd)
     }
 }
 
@@ -104,6 +108,7 @@ pub(super) fn display(cmd: RawCommand, res: RawResult) -> String {
         Algebra::QPol => display::display_ring(cmd, res),
         Algebra::F(_) => display::display_f(cmd, res),
         Algebra::FPol(_) => display::display_fpol(cmd, res),
+        Algebra::Zi => display::display_ring(cmd, res)
     }
 }
 

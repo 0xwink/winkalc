@@ -3,7 +3,7 @@ pub use crate::arithmetic::int;
 
 #[derive(PartialEq, Copy, Clone, Debug)]
 pub(super) enum Algebra {
-    Z, Q, QPol, F(int), FPol(int)
+    Z, Q, QPol, F(int), FPol(int), Zi
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]

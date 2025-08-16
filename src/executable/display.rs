@@ -1,6 +1,5 @@
 use super::datatype::*;
 
-
 pub(super) fn display_ring (cmd: RawCommand, res: RawResult) -> String {
     let op  = cmd.op;
     if op == Operation::Bezout {
