@@ -19,14 +19,17 @@ pub trait Parse: Sized {
 }
 
 impl Parse for Rational {
-    fn parse(input: &str) -> Result<Self, ParseError> {
-        let re_int = Regex::new(r"^ *([0-9]+) *$").unwrap();
-        let re_neg_int = Regex::new(r"^ *\- *([0-9]+) *$").unwrap();
-        let re_wrapped_neg_int = Regex::new(r"^ *\( *\- *([0-9]+) *\) *$").unwrap();
-        let re_q = Regex::new(r"^ *([0-9]+) */ *([0-9]+) *$").unwrap();
-        let re_wrapped_q = Regex::new(r"^ *\( *([0-9]+) */ *([0-9]+) *\) *$").unwrap();
-        let re_neg_wrapped_q = Regex::new(r"^ *\- *\( *([0-9]+) */ *([0-9]+) *\) *$").unwrap();
-        let re_wrapped_neg_q = Regex::new(r"^ *\( *\- *([0-9]+) */ *([0-9]+) *\) *$").unwrap();
+    fn parse(raw_input: &str) -> Result<Self, ParseError> {
+        let input_string: String = raw_input.split_ascii_whitespace().collect();
+        let input = input_string.as_str();
+ 
+        let re_int = Regex::new(r"^([0-9]+)$").unwrap();
+        let re_neg_int = Regex::new(r"^\-([0-9]+)$").unwrap();
+        let re_wrapped_neg_int = Regex::new(r"^\(\-([0-9]+)\)$").unwrap();
+        let re_q = Regex::new(r"^([0-9]+)/([0-9]+)$").unwrap();
+        let re_wrapped_q = Regex::new(r"^\(([0-9]+)/([0-9]+)\)$").unwrap();
+        let re_neg_wrapped_q = Regex::new(r"^\-\(([0-9]+)/([0-9]+)\)$").unwrap();
+        let re_wrapped_neg_q = Regex::new(r"^\(\-([0-9]+)/([0-9]+)\)$").unwrap();
 
         if re_int.is_match(input) {
             let caps = re_int.captures(input).unwrap();
@@ -35,7 +38,7 @@ impl Parse for Rational {
             Ok(Rational::new(output, 1))
         }
         else if re_neg_int.is_match(input){
-            let caps = re_int.captures(input).unwrap();
+            let caps = re_neg_int.captures(input).unwrap();
             let (_, [int]) = caps.extract();
             let output: int = int.parse().unwrap();
             Ok(Rational::new(-output, 1))
