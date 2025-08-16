@@ -217,13 +217,22 @@ impl Parse for ComplexRational {
         if pol.norm() >= 2 {
             return Err(ParseError::Operand);
         }
+        else if pol.norm() == 1 {
+            let res = ComplexRational{
+                real: pol.coefficient(0),
+                imag: pol.coefficient(1)
+            };
+            
+            return Ok(res);
+        }
+        else {
+            let res = ComplexRational {
+                real: pol.coefficient(0),
+                imag: Rational::zero()
+            };
 
-        let res = ComplexRational {
-            real: pol.coefficient(0),
-            imag: pol.coefficient(1)
-        };
-
-        Ok(res)
+            return Ok(res);
+        }
     }
 }
 
