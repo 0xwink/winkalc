@@ -1,7 +1,4 @@
-use crate::unwrapped_bezout;
-use super::{polynomial::ZPol, *};
-
-type Z = Integer;
+use super::*;
 
 #[derive(Clone, Copy)]
 pub struct Prime {
@@ -67,7 +64,7 @@ impl Prime {
         if x.number == 0 { panic!(); }
 
         let p = self.to_integer();
-        let (u, _, _) = unwrapped_bezout(&x, &p);
+        let u = Self::bezout(Duo{first: x, second: p}).first;
 
         self.modulo(&u)
     }

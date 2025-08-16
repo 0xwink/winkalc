@@ -1,15 +1,18 @@
 mod rational;
-mod integer;
-mod polynomial;
-mod prime;
-
 pub use rational::{Rational, ComplexRational};
+
+mod integer;
 pub use integer::{Integer, GaussInteger};
-pub use polynomial::Polynomial;
-pub use polynomial::{Z, ZPol, QPol};
-pub use i64 as int;
+
+mod polynomial;
+pub use polynomial::{Polynomial, Z, ZPol, QPol};
+
+mod prime;
 pub use prime::Prime;
 
-use super::{
-    Field, EuclideanRing, Duo, Trio
-};
+mod ring;
+pub use ring::{Field, EuclideanRing, Ring};
+
+pub use i64 as int;
+
+use super::{Duo, Trio};

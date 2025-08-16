@@ -123,8 +123,6 @@ impl GaussInteger{
     }
 }
 
-
-// work in progress
 impl EuclideanRing for GaussInteger{
     fn zero() -> Self {
         Self::new(0, 0 )
@@ -202,6 +200,7 @@ impl EuclideanRing for GaussInteger{
     }
 }
 
+// overloading arithmetic operators (+ - * =, etc.)
 mod chore {
     use super::{Integer, GaussInteger, EuclideanRing};
 
