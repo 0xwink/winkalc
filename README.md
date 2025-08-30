@@ -1,4 +1,4 @@
-# README
+# winkalc, a Light-weight Arithmetic Calculator
 
 ## Warning: Educational Project. Work in Progress
 
