@@ -10,7 +10,17 @@ pub enum ParseError {
 }
 impl ParseError {
     pub fn print(&self){
-        println!("Error: {self:?}\n");
+        let err_str: String = match *self {
+            ParseError::Algebra => "Failed to parse :ALG. Choose from: Z, Q, QPol, FPol(p), F(p), Zi.".to_string(),
+            ParseError::ZeroDenom => "Zero cannot be a denominator.".to_string(),
+            ParseError::Op => "Failed to parse :Op. Choose from: Add, Sub, Mul, Div, Bezout, Divmod.".to_string(),
+            ParseError::Operand => "Failed to parse :Operand. Please check the documentation for format rules.".to_string(),
+            ParseError::NotPrime => "It is not a prime number.".to_string(),
+            ParseError::Format => "Input failed to obey CLI syntax: [:Alg] :OP {:OPERAND1} {:OPERAND2}".to_string(),
+            _ => format!("{self:?}"),
+        };
+
+        println!("Error: {err_str}\n");
     }
 }
 
@@ -27,6 +37,7 @@ impl Parse for Rational {
         let re_neg_int = Regex::new(r"^\-([0-9]+)$").unwrap();
         let re_wrapped_neg_int = Regex::new(r"^\(\-([0-9]+)\)$").unwrap();
         let re_q = Regex::new(r"^([0-9]+)/([0-9]+)$").unwrap();
+        let re_neg_q = Regex::new(r"^\-([0-9]+)/([0-9]+)$").unwrap();
         let re_wrapped_q = Regex::new(r"^\(([0-9]+)/([0-9]+)\)$").unwrap();
         let re_neg_wrapped_q = Regex::new(r"^\-\(([0-9]+)/([0-9]+)\)$").unwrap();
         let re_wrapped_neg_q = Regex::new(r"^\(\-([0-9]+)/([0-9]+)\)$").unwrap();
@@ -58,6 +69,16 @@ impl Parse for Rational {
                 return Err(ParseError::ZeroDenom);
             }
             Ok(Rational::new(num, denom))
+        }
+        else if re_neg_q.is_match(input) {
+            let caps = re_neg_q.captures(input).unwrap();
+            let (_, [num_str, denom_str]) = caps.extract();
+            let num: int = num_str.parse().unwrap();
+            let denom: int = denom_str.parse().unwrap();
+            if denom == 0 {
+                return Err(ParseError::ZeroDenom);
+            }
+            Ok(Rational::new(-num, denom))
         }
         else if re_wrapped_q.is_match(input) {
             let caps = re_wrapped_q.captures(input).unwrap();
