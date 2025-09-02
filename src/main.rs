@@ -1,4 +1,4 @@
-use calculator::executable::go;
+use winkalc::executable::go;
 fn main(){
     go();
 }
