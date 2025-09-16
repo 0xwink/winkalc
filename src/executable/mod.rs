@@ -2,19 +2,20 @@ mod execution;
 mod display;
 mod datatype;
 mod func;
+mod input;
 
 pub fn go(){
+    let mut reader = input::new_editor();
+
     loop {
-        let mut input = String::new();
-        print!("> ");
-        
-        use std::io; use std::io::Write;
-        io::stdout().flush().unwrap();
-        io::stdin().read_line(&mut input).expect("Invalid input.");
+        let Ok(input) = reader.readline("> ") else {
+            println!("Goodbye!\n");
+            break;
+        };
 
         let input_str = input.trim();
         if input_str.to_ascii_lowercase() == "exit" {
-            println!("Goodbye!");
+            println!("Goodbye!\n");
             break;
         }
 
